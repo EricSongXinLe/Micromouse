@@ -26,6 +26,12 @@ void resetPID() {
 	 *
 	 * You should additionally set your distance and error goal values (and your oldDistanceError and oldAngleError) to zero.
 	 */
+	angleError = 0;
+	oldAngleError = 0;
+	distanceError = 0.4;
+	oldDistanceError = 0.4;
+	distanceCorrection = 0;
+	angleCorrection = 0;
 }
 
 void updatePID() {
