@@ -4,18 +4,26 @@
 
 #include "main.h"
 #include "motors.h"
+#include "encoders.h"
 
 int angleError = 0;
 int oldAngleError = 0;
+int goalAngle = 0;
 float angleCorrection;
+float oldAngleCorrection = 0;
 float distanceError = 0.4;
 float oldDistanceError = 0.4;
+float goalDistance = 0;
 float distanceCorrection;
+float oldDistanceCorrection = 0;;
 const float kPw = 1;
-const float kDw = 0.5;
-const float kPx = 0.5;
-const float kDx = 0.5;
-
+const float kDw = 1;
+const float kPx = 1;
+const float kDx = 1;
+int finishCount = 0;
+const float maxCorrectA = 0.35;
+const float maxCorrectD = 0.5;
+const float accelConstD = 0.0001;
 void resetPID() {
 	/*
 	 * For assignment 3.1: This function does not need to do anything
@@ -30,8 +38,15 @@ void resetPID() {
 	oldAngleError = 0;
 	distanceError = 0.4;
 	oldDistanceError = 0.4;
+	oldDistanceCorrection = 0;
+	oldAngleCorrection = 0;
 	distanceCorrection = 0;
 	angleCorrection = 0;
+	finishCount = 0;
+	goalDistance = 0;
+	goalAngle = 0;
+	resetEncoders();
+	resetMotors();
 }
 
 void updatePID() {
@@ -52,16 +67,39 @@ void updatePID() {
 	 * your left and right encoder counts. Calculate angleError as the difference between your goal angle and the difference between your left and
 	 * right encoder counts. Refer to pseudocode example document on the google drive for some pointers.
 	 */
-	angleError = getRightEncoderCounts() - getLeftEncoderCounts();
+	angleError = goalAngle - (getLeftEncoderCounts() - getRightEncoderCounts());
 	angleCorrection = kPw * angleError + kDw * (angleError-oldAngleError);
 	oldAngleError = angleError;
+	if (angleCorrection > maxCorrectA)
+		angleCorrection = maxCorrectA;
+	else if (angleCorrection < -maxCorrectA)
+		angleCorrection = -maxCorrectA;
 
-	distanceError = 0.4;
+	distanceError = goalDistance - ((getLeftEncoderCounts() + getRightEncoderCounts())/2);
+	//goalDistance - ((getRightEncoderCounts()+getLeftEncoderCounts())/2);
 	distanceCorrection = kPx * distanceError + kDx * (distanceError - oldDistanceError);
 	oldDistanceError = distanceError;
 
-	setMotorLPWM(0.2+distanceCorrection+angleCorrection);
-	setMotorRPWM(0.2+distanceCorrection-angleCorrection);
+//	if ((distanceCorrection - oldDistanceCorrection) > accelConstD)
+//		distanceCorrection = oldDistanceCorrection + accelConstD;
+//	else if ((distanceCorrection - oldDistanceCorrection) < accelConstD)
+//		distanceCorrection = oldDistanceCorrection - accelConstD;
+
+	oldDistanceCorrection = distanceCorrection;
+
+
+	if (distanceCorrection > maxCorrectD)
+		distanceCorrection = maxCorrectD;
+	else if (distanceCorrection < -maxCorrectD)
+		distanceCorrection = -maxCorrectD;
+
+
+
+	setMotorLPWM(distanceCorrection + angleCorrection);
+	setMotorRPWM(distanceCorrection - angleCorrection);
+
+	if ((distanceError < 3 && distanceError > -3) && (angleError < 3 && angleError > -3) )
+		finishCount++;
 
 
 }
@@ -71,6 +109,7 @@ void setPIDGoalD(int16_t distance) {
 	 * For assignment 3.1: this function does not need to do anything.
 	 * For assignment 3.2: this function should set a variable that stores the goal distance.
 	 */
+	goalDistance = distance;
 }
 
 void setPIDGoalA(int16_t angle) {
@@ -78,6 +117,7 @@ void setPIDGoalA(int16_t angle) {
 	 * For assignment 3.1: this function does not need to do anything
 	 * For assignment 3.2: This function should set a variable that stores the goal angle.
 	 */
+	goalAngle = angle;
 }
 
 int8_t PIDdone(void) { // There is no bool type in C. True/False values are represented as 1 or 0.
@@ -87,6 +127,7 @@ int8_t PIDdone(void) { // There is no bool type in C. True/False values are repr
 	 * the error is zero (realistically, have it set the variable when the error is close to zero, not just exactly zero). You will have better results if you make
 	 * PIDdone() return true only if the error has been sufficiently close to zero for a certain number, say, 50, of SysTick calls in a row.
 	 */
-
-	return 1;
+	if (finishCount > 500)
+		return 1;
+	return 0;
 }
