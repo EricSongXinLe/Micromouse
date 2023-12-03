@@ -55,12 +55,15 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 int16_t left_counts = 0;
 int16_t right_counts = 0;
-const int WALL_DIST_THRES_FRONT = 1400;
-const int WALL_DIST_THRES_SIDE = 1400;
 int16_t wall_dist_front = 0;
 int16_t wall_dist_right = 0;
 int16_t wall_dist_left = 0;
+
+const int WALL_THRES_FRONT = 1400;
+const int WALL_THRES_SIDE = 1400;
+const int WALL_THRES_TURN = 300;
 const int TURNCT = 504;
+const int ERROR_CORR_TURNCT = 38;
 
 /* USER CODE END PV */
 
@@ -136,25 +139,25 @@ int main(void)
 	  wall_dist_front = (readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT))/2;
 	  //wall_dist_right = readIR(IR_RIGHT);
 	  //wall_dist_left = readIR(IR_LEFT);
-	  while(wall_dist_front < WALL_DIST_THRES_FRONT){
+	  while(wall_dist_front < WALL_THRES_FRONT){
 		  move(1); //go straight if there is no wall in front of you.
 		  wall_dist_front = (readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT))/2;
 		  wall_dist_right = readIR(IR_RIGHT);
 		  wall_dist_left = readIR(IR_LEFT);
-		  if(wall_dist_right > WALL_DIST_THRES_SIDE){
-			  turn(-38);
+		  if(wall_dist_right > WALL_THRES_SIDE){
+			  turn(-ERROR_CORR_TURNCT); //this is arbitrary value still
 		  }
-		  else if(wall_dist_left > WALL_DIST_THRES_SIDE){
-			  turn(38);
+		  else if(wall_dist_left > WALL_THRES_SIDE){
+			  turn(ERROR_CORR_TURNCT);
 		  }
 	  }
-	  if(readIR(IR_RIGHT)<300){ //no wall to the right
-		  turn(500);
+	  if(readIR(IR_RIGHT)<WALL_THRES_TURN){ //no wall to the right
+		  turn(TURNCT);
 		  //move(1);//Optional to comment move(1);
 		  continue;
 	  }
 	  else{
-		  turn(-500);
+		  turn(-TURNCT);
 		  //move(1); //Optional to comment move(1);
 		  continue;
 	  }
