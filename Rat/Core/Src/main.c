@@ -24,6 +24,7 @@
 #include "motors.h"
 #include "encoders.h"
 #include "delay.h"
+#include "irs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -54,8 +55,13 @@ UART_HandleTypeDef huart2;
 /* USER CODE BEGIN PV */
 int16_t left_counts = 0;
 int16_t right_counts = 0;
-const int WALL_DIST_THRES = 200;
+const int WALL_DIST_THRES_FRONT = 1400;
+const int WALL_DIST_THRES_SIDE = 1400;
 int16_t wall_dist_front = 0;
+int16_t wall_dist_right = 0;
+int16_t wall_dist_left = 0;
+const int TURNCT = 504;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -122,28 +128,34 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-	//move(1);
-	//turn(1);
-	//move(1);
-	//turn(-1);
+	//turn(-4);
 
   while (1)
   {
-	  //left_counts = getLeftEncoderCounts();
-	  //right_counts = getRightEncoderCounts();
+
 	  wall_dist_front = (readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT))/2;
-	  while(wall_dist_front > WALL_DIST_THRES){
+	  //wall_dist_right = readIR(IR_RIGHT);
+	  //wall_dist_left = readIR(IR_LEFT);
+	  while(wall_dist_front < WALL_DIST_THRES_FRONT){
 		  move(1); //go straight if there is no wall in front of you.
 		  wall_dist_front = (readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT))/2;
+		  wall_dist_right = readIR(IR_RIGHT);
+		  wall_dist_left = readIR(IR_LEFT);
+		  if(wall_dist_right > WALL_DIST_THRES_SIDE){
+			  turn(-38);
+		  }
+		  else if(wall_dist_left > WALL_DIST_THRES_SIDE){
+			  turn(38);
+		  }
 	  }
-	  if(readIR(IR_RIGHT)>WALL_DIST_THRES){ //no wall to the right
-		  turn(1);
-		  move(1);//Optional to comment move(1);
+	  if(readIR(IR_RIGHT)<300){ //no wall to the right
+		  turn(500);
+		  //move(1);//Optional to comment move(1);
 		  continue;
 	  }
 	  else{
-		  turn(-1);
-		  move(1); //Optional to comment move(1);
+		  turn(-500);
+		  //move(1); //Optional to comment move(1);
 		  continue;
 	  }
 

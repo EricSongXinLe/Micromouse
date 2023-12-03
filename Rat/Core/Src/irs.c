@@ -4,13 +4,14 @@
 
 #include "main.h"
 #include "irs.h"
-#include "delay.h'"
+#include "delay.h"
 
 // This is the buffer that will get filled up with all the measurements
 uint16_t adc_buf[NUM_SAMPLES];
 // "boolean" variable to keep say when the ADC has finished filling up the buffer
 uint8_t complete = 0;
 const int DELAY = 25;
+int returnVal = 0;
 
 /*
  This function should handle everything for reading a specific IR
@@ -24,29 +25,30 @@ uint16_t readIR(IR ir)
 	if(ir == IR_LEFT){
 		HAL_GPIO_WritePin(LeftEmitter_GPIO_Port, LeftEmitter_Pin, GPIO_PIN_SET); //Turns on Emitter
 		delayMicroseconds(DELAY);
-		readLeftIR();
+		returnVal = readLeftIR();
 		HAL_GPIO_WritePin(LeftEmitter_GPIO_Port, LeftEmitter_Pin, GPIO_PIN_RESET); //Turns off Emitter
 
 	}
 	else if(ir == IR_FRONT_LEFT){
 		HAL_GPIO_WritePin(FrontLeftEmitter_GPIO_Port, FrontLeftEmitter_Pin, GPIO_PIN_SET); //Turns on Emitter
 		delayMicroseconds(DELAY);
-		readFrontLeftIR();
+		returnVal = readFrontLeftIR();
 		HAL_GPIO_WritePin(FrontLeftEmitter_GPIO_Port, FrontLeftEmitter_Pin, GPIO_PIN_RESET); //Turns off Emitter
 	}
 	else if(ir == IR_FRONT_RIGHT){
 		HAL_GPIO_WritePin(FrontRightEmitter_GPIO_Port, FrontRightEmitter_Pin, GPIO_PIN_SET); //Turns on Emitter
 		delayMicroseconds(DELAY);
-		readFrontRightIR();
+		returnVal = readFrontRightIR();
 		HAL_GPIO_WritePin(FrontRightEmitter_GPIO_Port, FrontRightEmitter_Pin, GPIO_PIN_RESET); //Turns on Emitter
 	}
 	else if(ir == IR_RIGHT){
 		HAL_GPIO_WritePin(RightEmitter_GPIO_Port, RightEmitter_Pin, GPIO_PIN_SET); //Turns on Emitter
 		delayMicroseconds(DELAY);
-		readRightIR();
+		returnVal = readRightIR();
 		HAL_GPIO_WritePin(RightEmitter_GPIO_Port, RightEmitter_Pin, GPIO_PIN_RESET); //Turns on Emitter
 
 	}
+	return returnVal;
 }
 
 /*

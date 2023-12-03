@@ -22,7 +22,7 @@ const float kPx = 1;
 const float kDx = 1;
 int finishCount = 0;
 const float maxCorrectA = 0.35;
-const float maxCorrectD = 0.5;
+const float maxCorrectD = 0.3;
 const float accelConstD = 0.0001;
 void resetPID() {
 	/*
@@ -98,7 +98,7 @@ void updatePID() {
 	setMotorLPWM(distanceCorrection + angleCorrection);
 	setMotorRPWM(distanceCorrection - angleCorrection);
 
-	if ((distanceError < 3 && distanceError > -3) && (angleError < 3 && angleError > -3) )
+	if ((distanceError < 3 && distanceError > -3) && (angleError < 2 && angleError > -2) )
 		finishCount++;
 
 
