@@ -11,19 +11,21 @@ int oldAngleError = 0;
 int goalAngle = 0;
 float angleCorrection;
 float oldAngleCorrection = 0;
-float distanceError = 0.4;
-float oldDistanceError = 0.4;
+float distanceError = 0;
+float oldDistanceError = 0;
 float goalDistance = 0;
 float distanceCorrection;
 float oldDistanceCorrection = 0;;
-const float kPw = 1;
-const float kDw = 1;
-const float kPx = 1;
-const float kDx = 1;
+const float kPw = 1; //1
+const float kDw = 0.5; //1
+const float kPx = 0.3; //1
+const float kDx = 0.5; //1
 int finishCount = 0;
-const float maxCorrectA = 0.35;
-const float maxCorrectD = 0.3;
+const float maxCorrectA = 0.4; //0.35
+const float maxCorrectD = 0.47; //0.3
 const float accelConstD = 0.0001;
+float leftRPM = 0;
+float rightRPM = 0;
 void resetPID() {
 	/*
 	 * For assignment 3.1: This function does not need to do anything
@@ -34,10 +36,12 @@ void resetPID() {
 	 *
 	 * You should additionally set your distance and error goal values (and your oldDistanceError and oldAngleError) to zero.
 	 */
+	leftRPM = 0;
+	rightRPM = 0;
 	angleError = 0;
 	oldAngleError = 0;
-	distanceError = 0.4;
-	oldDistanceError = 0.4;
+	distanceError = 0;
+	oldDistanceError = 0;
 	oldDistanceCorrection = 0;
 	oldAngleCorrection = 0;
 	distanceCorrection = 0;
@@ -80,7 +84,7 @@ void updatePID() {
 	distanceCorrection = kPx * distanceError + kDx * (distanceError - oldDistanceError);
 	oldDistanceError = distanceError;
 
-//	if ((distanceCorrection - oldDistanceCorrection) > accelConstD)
+//	if ((distanceCorrection - oldDistanceCorrection) > accelConstD) //this still doesn't work lol
 //		distanceCorrection = oldDistanceCorrection + accelConstD;
 //	else if ((distanceCorrection - oldDistanceCorrection) < accelConstD)
 //		distanceCorrection = oldDistanceCorrection - accelConstD;
@@ -93,11 +97,23 @@ void updatePID() {
 	else if (distanceCorrection < -maxCorrectD)
 		distanceCorrection = -maxCorrectD;
 
-
-
-	setMotorLPWM(distanceCorrection + angleCorrection);
-	setMotorRPWM(distanceCorrection - angleCorrection);
-
+	leftRPM = distanceCorrection + angleCorrection;
+	rightRPM = distanceCorrection - angleCorrection;
+	if (angleCorrection == maxCorrectA || angleCorrection == -maxCorrectA)
+	{
+		if(leftRPM > maxCorrectA)
+			leftRPM = maxCorrectA;
+		if(leftRPM < -maxCorrectA)
+			leftRPM = -maxCorrectA;
+		if(rightRPM > maxCorrectA)
+			rightRPM = maxCorrectA;
+		if(rightRPM < -maxCorrectA)
+			rightRPM = -maxCorrectA;
+	}
+	//setMotorLPWM(distanceCorrection + angleCorrection);
+	//setMotorRPWM(distanceCorrection - angleCorrection);
+	setMotorLPWM(leftRPM);
+	setMotorRPWM(rightRPM);
 	if ((distanceError < 3 && distanceError > -3) && (angleError < 2 && angleError > -2) )
 		finishCount++;
 

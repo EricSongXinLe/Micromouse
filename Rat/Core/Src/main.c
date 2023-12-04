@@ -59,11 +59,11 @@ int16_t wall_dist_front = 0;
 int16_t wall_dist_right = 0;
 int16_t wall_dist_left = 0;
 
-const int WALL_THRES_FRONT = 1400;
-const int WALL_THRES_SIDE = 1400;
-const int WALL_THRES_TURN = 300;
-const int TURNCT = 504;
-const int ERROR_CORR_TURNCT = 38;
+const int WALL_THRES_FRONT = 1350;
+const int WALL_THRES_SIDE = 2350;
+const int WALL_THRES_TURN = 500;
+const int TURNCT = 490;
+const int ERROR_CORR_TURNCT = 25;
 
 /* USER CODE END PV */
 
@@ -89,6 +89,13 @@ static void MX_ADC1_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+
+uint16_t findMax(uint16_t s1, uint16_t s2){
+	if (s1>s2)
+		return s1;
+	return s2;
+}
+
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -136,28 +143,37 @@ int main(void)
   while (1)
   {
 
-	  wall_dist_front = (readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT))/2;
+
+	  wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
 	  //wall_dist_right = readIR(IR_RIGHT);
 	  //wall_dist_left = readIR(IR_LEFT);
 	  while(wall_dist_front < WALL_THRES_FRONT){
+		  //moveAndTurn(1,0);
 		  move(1); //go straight if there is no wall in front of you.
-		  wall_dist_front = (readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT))/2;
+		  wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
 		  wall_dist_right = readIR(IR_RIGHT);
 		  wall_dist_left = readIR(IR_LEFT);
 		  if(wall_dist_right > WALL_THRES_SIDE){
 			  turn(-ERROR_CORR_TURNCT); //this is arbitrary value still
+			  //moveAndTurn(1,-ERROR_CORR_TURNCT);
 		  }
 		  else if(wall_dist_left > WALL_THRES_SIDE){
 			  turn(ERROR_CORR_TURNCT);
+			  //moveAndTurn(1,ERROR_CORR_TURNCT);
+
 		  }
 	  }
-	  if(readIR(IR_RIGHT)<WALL_THRES_TURN){ //no wall to the right
-		  turn(TURNCT);
+	  if(readIR(IR_LEFT)<WALL_THRES_TURN){ //no wall to the left
+		  delayMicroseconds(1000000); //1 sec
+		  turn(-TURNCT);
+		  //moveAndTurn(1,-TURNCT);
 		  //move(1);//Optional to comment move(1);
 		  continue;
 	  }
 	  else{
-		  turn(-TURNCT);
+		  delayMicroseconds(1000000); //1 sec
+		  turn(TURNCT);
+		  //moveAndTurn(1,TURNCT);
 		  //move(1); //Optional to comment move(1);
 		  continue;
 	  }

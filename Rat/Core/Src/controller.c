@@ -52,3 +52,14 @@ void turn(int n) {
 	}
 	resetPID();
 }
+/*
+void moveAndTurn(int8_t nM, int nT){
+	setPIDGoalD(nM * mazeSquare);
+	setPIDGoalA(nT);
+		while (PIDdone() == 0){
+			updatePID();
+			loopct++;
+		}
+		resetPID();
+}
+*/
