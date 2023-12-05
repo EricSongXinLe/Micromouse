@@ -61,8 +61,7 @@ int16_t wall_dist_right = 0;
 int16_t wall_dist_left = 0;
 
 const int WALL_THRES_FRONT = 1000;
-const int WALL_THRES_RIGHT_SIDE = 2520;
-const int WALL_THRES_LEFT_SIDE = 2520;
+const int WALL_THRES_SIDE = 2520;
 const int WALL_THRES_TURN = 400;
 const int TURNCT = 490;
 const int ERROR_CORR_TURNCT = 25;
@@ -155,8 +154,8 @@ int main(void)
 		  wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
 		  wall_dist_right = readIR(IR_RIGHT);
 		  wall_dist_left = readIR(IR_LEFT);
-		  while (wall_dist_right > WALL_THRES_RIGHT_SIDE) {
-			  turn(-(wall_dist_right - WALL_THRES_RIGHT_SIDE) * 0.1); //this is arbitrary value still
+		  while (wall_dist_right > WALL_THRES_SIDE) {
+			  turn(-(wall_dist_right - WALL_THRES_SIDE) * 0.1); //this is arbitrary value still
 			  // moveAndTurn(1,-ERROR_CORR_TURNCT);
 			  	move(0.1);
 			wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
@@ -165,8 +164,8 @@ int main(void)
 			  }
 			  wall_dist_right = readIR(IR_RIGHT);
 		  }
-		  while(wall_dist_left > WALL_THRES_LEFT_SIDE){
-			  turn((wall_dist_left - WALL_THRES_LEFT_SIDE) * 0.1);
+		  while(wall_dist_left > WALL_THRES_SIDE){
+			  turn((wall_dist_left - WALL_THRES_SIDE) * 0.1);
 			  //moveAndTurn(1,ERROR_CORR_TURNCT);
 			  move(0.1);
 			  wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
