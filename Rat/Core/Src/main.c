@@ -25,6 +25,7 @@
 #include "encoders.h"
 #include "delay.h"
 #include "irs.h"
+#include "controller.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -59,9 +60,10 @@ int16_t wall_dist_front = 0;
 int16_t wall_dist_right = 0;
 int16_t wall_dist_left = 0;
 
-const int WALL_THRES_FRONT = 1350;
-const int WALL_THRES_SIDE = 2350;
-const int WALL_THRES_TURN = 500;
+const int WALL_THRES_FRONT = 1000;
+const int WALL_THRES_RIGHT_SIDE = 2520;
+const int WALL_THRES_LEFT_SIDE = 2520;
+const int WALL_THRES_TURN = 400;
 const int TURNCT = 490;
 const int ERROR_CORR_TURNCT = 25;
 
@@ -149,29 +151,40 @@ int main(void)
 	  //wall_dist_left = readIR(IR_LEFT);
 	  while(wall_dist_front < WALL_THRES_FRONT){
 		  //moveAndTurn(1,0);
-		  move(1); //go straight if there is no wall in front of you.
+		  move(0.5); //go straight if there is no wall in front of you.
 		  wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
 		  wall_dist_right = readIR(IR_RIGHT);
 		  wall_dist_left = readIR(IR_LEFT);
-		  if(wall_dist_right > WALL_THRES_SIDE){
-			  turn(-ERROR_CORR_TURNCT); //this is arbitrary value still
-			  //moveAndTurn(1,-ERROR_CORR_TURNCT);
+		  while (wall_dist_right > WALL_THRES_RIGHT_SIDE) {
+			  turn(-(wall_dist_right - WALL_THRES_RIGHT_SIDE) * 0.1); //this is arbitrary value still
+			  // moveAndTurn(1,-ERROR_CORR_TURNCT);
+			  	move(0.1);
+			wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
+			  if (wall_dist_front > WALL_THRES_FRONT ) {
+				  move(-0.15);
+			  }
+			  wall_dist_right = readIR(IR_RIGHT);
 		  }
-		  else if(wall_dist_left > WALL_THRES_SIDE){
-			  turn(ERROR_CORR_TURNCT);
+		  while(wall_dist_left > WALL_THRES_LEFT_SIDE){
+			  turn((wall_dist_left - WALL_THRES_LEFT_SIDE) * 0.1);
 			  //moveAndTurn(1,ERROR_CORR_TURNCT);
+			  move(0.1);
+			  wall_dist_front = ((readIR(IR_FRONT_LEFT)+readIR(IR_FRONT_RIGHT)))/2;
+			  if (wall_dist_front > WALL_THRES_FRONT) {
+			 				  move(-0.15);
+			 			  }
+			  wall_dist_left = readIR(IR_LEFT);
 
 		  }
+
 	  }
 	  if(readIR(IR_LEFT)<WALL_THRES_TURN){ //no wall to the left
-		  delayMicroseconds(1000000); //1 sec
 		  turn(-TURNCT);
 		  //moveAndTurn(1,-TURNCT);
 		  //move(1);//Optional to comment move(1);
 		  continue;
 	  }
 	  else{
-		  delayMicroseconds(1000000); //1 sec
 		  turn(TURNCT);
 		  //moveAndTurn(1,TURNCT);
 		  //move(1); //Optional to comment move(1);
