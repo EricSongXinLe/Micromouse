@@ -6,3 +6,5 @@ Rat/.DS_Store
 Rat/.settings/language.settings.xml
 *.out
 *.xml
+/Floodfill/.vscode
+Floodfill/a

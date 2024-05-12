@@ -2,7 +2,7 @@
 #include "API.h"
 
 Action solver() {
-    return leftWallFollower();
+    return floodFill();
 }
 
 // This is an example of a simple left wall following algorithm.
